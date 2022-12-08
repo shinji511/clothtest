@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+
+  <html lang="zh-CN">
+    <head>
+      <meta charset="utf-8" />
+      <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>使用百度 API 实现图像识别</title>
+      <style type="text/css">
+        .spanstyle {
+          display: inline-block;
+          width: 500px;
+          height: 500px;
+          position: relative;
+        }
+      </style>
+      <script src="jquery-3.6.1.min.js"></script>
+      <script>
+        function imageUpload(imgFile) {
+          var uploadfile = imgFile.files[0]; //获取图片文件流
+          var formData = new FormData();    //创建一个FormData对象
+          formData.append("file", uploadfile); //将图片放入FormData对象对象中(由于图片属于文件格式，不能直接将文件流直接通过ajax传递到后台，需要放入FormData对象中。在传递)
+          $("#loading").css("opacity", 1);
+          $.ajax({
+            type: "POST", //POST请求
+            url: "upload.php", //接收图片的地址(同目录下的php文件)
+            data: formData, //传递的数据
+            dataType: "json", //声明成功使用json数据类型回调//如果传递的是FormData数据类型，那么下来的三个参数是必须的，否则会报错
+            cache: false, //默认是true，但是一般不做缓存
+            processData: false, //用于对data参数进行序列化处理，这里必须false；如果是true，就会将FormData转换为String类型
+            contentType: false, //一些文件上传http协议的关系，自行百度，如果上传的有文件，那么只能设置为false
+            success: function (msg) {
+              //请求成功后的回调函数
+              console.log(msg.result); //预览上传的图片
+              var filereader = new FileReader();
+              filereader.onload = function (event) {
+                var srcpath = event.target.result;
+                $("#loading").css("opacity", 0);
+                $("#PreviewImg").attr("src", srcpath);
+              };
+              filereader.readAsDataURL(uploadfile); //将后台返回的数据进行进一步处理
+              var data =
+                "物品名称：" +
+                msg.result[0].keyword +
+                "; 识别度：" +
+                msg.result[0].score * 100 +
+                "%" +
+                ";所属类目：" +
+                msg.result[0].root +
+                ";";
+              data =
+                data +
+                "物品名称：" +
+                msg.result[1].keyword +
+                "; 识别度：" +
+                msg.result[1].score * 100 +
+                "%" +
+                ";所属类目：" +
+                msg.result[1].root +
+                ";";
+              data =
+                data +
+                "物品名称：" +
+                msg.result[2].keyword +
+                "; 识别度：" +
+                msg.result[2].score * 100 +
+                "%" +
+                ";所属类目：" +
+                msg.result[2].root +
+                ";";
+              data =
+                data +
+                "物品名称：" +
+                msg.result[3].keyword +
+                "; 识别度：" +
+                msg.result[3].score * 100 +
+                "%" +
+                ";所属类目：" +
+                msg.result[3].root +
+                ";";
+              data =
+                data +
+                "物品名称：" +
+                msg.result[4].keyword +
+                "; 识别度：" +
+                msg.result[4].score * 100 +
+                "%" +
+                ";所属类目：" +
+                msg.result[4].root +
+                ";"; //将识别的数据在页面渲染出来
+              $("#content").html(data);
+            },
+          });
+        }
+      </script>
+    </head>
+    <body>
+      <fieldset>
+        <input type="file" onchange="imageUpload(this)" />
+        <legend>图片上传</legend>
+      </fieldset>
+      <div style="margin-top: 2%">
+        <span class="spanstyle">
+          <img
+            id="PreviewImg"
+            src="txu.jpg"
+            style="width: 100%; max-height: 100%"
+          />
+          <img
+            id="loading"
+            style="
+              width: 100px;
+              height: 100px;
+              top: 36%;
+              left: 39%;
+              position: absolute;
+              opacity: 0;
+            "
+            src="loading.gif"
+          />
+        </span>
+        <span
+          class="spanstyle"
+          style="
+            vertical-align: top;
+            border: 1px dashed #ccc;
+            background-color: #4ea8ef;
+            color: white;
+          "
+        >
+          <h4 style="padding-left: 2%">识别结果：</h4>
+          <ol style="padding-right: 20px" id="content"></ol>
+        </span>
+      </div>
+    </body>
+  </html>
+</html>
